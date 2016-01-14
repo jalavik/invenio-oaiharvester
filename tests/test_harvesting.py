@@ -48,12 +48,14 @@ class OaiHarvesterTests(InvenioTestCase):
             body=raw_physics_xml,
             content_type='text/xml'
         )
-        records = list_records(metadata_prefix='arXiv',
-                               from_date='2015-01-15',
-                               until_date='2015-01-20',
-                               url='http://export.arxiv.org/oai2',
-                               name=None,
-                               setSpec='cs physics')
+        _, records = list_records(
+            metadata_prefix='arXiv',
+            from_date='2015-01-15',
+            until_date='2015-01-20',
+            url='http://export.arxiv.org/oai2',
+            name=None,
+            setSpec='cs physics'
+        )
         assert len(records) == 196   # 46 cs + 150 physics
 
     @responses.activate
@@ -68,8 +70,9 @@ class OaiHarvesterTests(InvenioTestCase):
             body=raw_xml,
             content_type='text/xml'
         )
-        for rec in get_records(['oai:arXiv.org:1507.03011'],
-                               url='http://export.arxiv.org/oai2'):
+        _, records = get_records(['oai:arXiv.org:1507.03011'],
+                                 url='http://export.arxiv.org/oai2')
+        for rec in records:
             identifier_in_request = rec.xml.xpath(
                 "//dc:identifier",
                 namespaces={"dc": "http://purl.org/dc/elements/1.1/"}
@@ -89,9 +92,10 @@ class OaiHarvesterTests(InvenioTestCase):
             body=raw_xml,
             content_type='text/xml'
         )
-        for rec in get_records(['oai:arXiv.org:1507.03011'],
-                               metadata_prefix="arXiv",
-                               url='http://export.arxiv.org/oai2'):
+        _, records = get_records(['oai:arXiv.org:1507.03011'],
+                                 metadata_prefix="arXiv",
+                                 url='http://export.arxiv.org/oai2')
+        for rec in records:
             identifier_in_request = rec.xml.xpath(
                 "//arXiv:id",
                 namespaces={"arXiv": "http://arxiv.org/OAI/arXiv/"}

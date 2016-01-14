@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2015 CERN.
+# Copyright (C) 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -67,7 +67,7 @@ def list_records(metadata_prefix=None, from_date=None, until_date=None,
         records.extend(list(request.ListRecords(metadataPrefix=metadata_prefix or "oai_dc",
                                                 set=spec,
                                                 **dates)))
-    return records
+    return request, records
 
 
 def get_records(identifiers, metadata_prefix=None, url=None, name=None):
@@ -90,13 +90,14 @@ def get_records(identifiers, metadata_prefix=None, url=None, name=None):
         raise NameOrUrlMissing("Retry using the parameters -n <name> or -u <url>.")
 
     request = Sickle(url)
-
+    records = []
     for identifier in identifiers:
         arguments = {
             'identifier': identifier,
             'metadataPrefix': metadata_prefix or "oai_dc"
         }
-        yield request.GetRecord(**arguments)
+        records.append(request.GetRecord(**arguments))
+    return request, records
 
 
 def get_info_by_oai_name(name):

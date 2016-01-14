@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 # This file is part of Invenio.
-# Copyright (C) 2014, 2015 CERN.
+# Copyright (C) 2014, 2015, 2016 CERN.
 #
 # Invenio is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -178,22 +178,6 @@ def update_lastrun(oaiharvest_object):
     """
     oaiharvest_object.lastrun = datetime.now()
     oaiharvest_object.save()
-
-
-def get_workflow_name(workflow, name):
-    """Return the name of the workflow depending on whether a name was provided or not.
-
-    :param workflow: The workflow name.
-    :param name: The name of the oaiHARVEST object.
-    """
-    if workflow is not None:
-        return workflow
-    elif name is not None:
-        obj = get_oaiharvest_object(name)
-        return obj.workflows
-    else:
-        from invenio_oaiharvester.errors import WorkflowNotFound
-        raise WorkflowNotFound("Workflow not found. Try '-o workflow -w <workflow name> or provide a name (-n <name>).")
 
 
 def get_oaiharvest_object(name):
