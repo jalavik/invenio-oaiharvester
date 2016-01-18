@@ -18,13 +18,43 @@
 # 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 
 import os
+import re
 import responses
 
-from invenio_oaiharvester.api import get_records
+from invenio_oaiharvester.api import get_records, list_records
 from invenio_testing import InvenioTestCase
 
 
 class OaiHarvesterTests(InvenioTestCase):
+
+    @responses.activate
+    def test_list_records(self):
+        raw_cs_xml = open(os.path.join(
+            os.path.dirname(__file__), "data/sample_arxiv_response_listrecords_cs.xml"
+        )).read()
+        raw_physics_xml = open(os.path.join(
+            os.path.dirname(__file__), "data/sample_arxiv_response_listrecords_physics.xml"
+        )).read()
+
+        responses.add(
+            responses.GET,
+            re.compile(r'http?://export.arxiv.org/oai2.*set=cs&.*'),
+            body=raw_cs_xml,
+            content_type='text/xml'
+        )
+        responses.add(
+            responses.GET,
+            re.compile(r'http?://export.arxiv.org/oai2.*set=physics&.*'),
+            body=raw_physics_xml,
+            content_type='text/xml'
+        )
+        records = list_records(metadata_prefix='arXiv',
+                               from_date='2015-01-15',
+                               until_date='2015-01-20',
+                               url='http://export.arxiv.org/oai2',
+                               name=None,
+                               setSpec='cs physics')
+        assert len(records) == 196   # 46 cs + 150 physics
 
     @responses.activate
     def test_get_from_identifiers(self):

@@ -62,9 +62,12 @@ def list_records(metadata_prefix=None, from_date=None, until_date=None,
     if (dates['until'] is not None) and (dates['from'] > dates['until']):
         raise WrongDateCombination("'Until' date larger than 'from' date.")
 
-    return request.ListRecords(metadataPrefix=metadata_prefix or "oai_dc",
-                               set=setSpec,
-                               **dates)
+    records = []
+    for spec in setSpec.split():
+        records.extend(list(request.ListRecords(metadataPrefix=metadata_prefix or "oai_dc",
+                                                set=spec,
+                                                **dates)))
+    return records
 
 
 def get_records(identifiers, metadata_prefix=None, url=None, name=None):

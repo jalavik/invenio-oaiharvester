@@ -77,7 +77,7 @@ class OAIHarvesterUtils(InvenioTestCase):
         from invenio_oaiharvester.utils import record_extraction_from_string
         raw_xml = open(os.path.join(
             os.path.dirname(__file__),
-            "data/sample_arxiv_response_listrecords.xml"
+            "data/sample_inspire_response_listrecords.xml"
         )).read()
         self.assertEqual(len(record_extraction_from_string(raw_xml)),
                          2)
