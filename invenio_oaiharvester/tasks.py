@@ -23,12 +23,12 @@ from invenio_celery import celery
 
 from .api import get_records, list_records
 from .signals import oaiharvest_finished
-from .utils import get_identifier_names, get_oaiharvest_object
+from .utils import get_identifier_names
 
 
 @celery.task
 def get_specific_records(identifiers, metadata_prefix=None, url=None,
-                         name=None, directory=None, **kwargs):
+                         name=None, directory=None, signals=True, **kwargs):
     """Call the module API, in order to harvest specific records from an OAI repo,
     based on their unique identifiers.
 
@@ -37,16 +37,18 @@ def get_specific_records(identifiers, metadata_prefix=None, url=None,
     :param url: The The url to be used to create the endpoint.
     :param name: The name of the OaiHARVEST object that we want to use to create the endpoint.
     :param directory: The directory that we want to send the harvesting results.
+    :param signals: If signals should be emitted about results.
     """
     identifiers = get_identifier_names(identifiers)
     request, records = get_records(identifiers, metadata_prefix, url, name)
-    oaiharvest_finished.send(request, records=records, name=name, **kwargs)
+    if signals:
+        oaiharvest_finished.send(request, records=records, name=name, **kwargs)
     return records
 
 
 @celery.task
 def list_records_from_dates(metadata_prefix=None, from_date=None, until_date=None, url=None,
-                            name=None, setSpec=None, directory=None, **kwargs):
+                            name=None, setSpec=None, directory=None, signals=True, **kwargs):
     """Call the module API, in order to harvest records from an OAI repo,
     based on datestamp and/or set parameters.
 
@@ -57,7 +59,9 @@ def list_records_from_dates(metadata_prefix=None, from_date=None, until_date=Non
     :param name: The name of the OaiHARVEST object that we want to use to create the endpoint.
     :param setSpec: The 'set' criteria for the harvesting (optional).
     :param directory: The directory that we want to send the harvesting results.
+    :param signals: If signals should be emitted about results.
     """
     request, records = list_records(metadata_prefix, from_date, until_date, url, name, setSpec)
-    oaiharvest_finished.send(request, records=records, name=name, **kwargs)
+    if signals:
+        oaiharvest_finished.send(request, records=records, name=name, **kwargs)
     return records
