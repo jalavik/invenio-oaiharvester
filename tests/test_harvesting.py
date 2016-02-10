@@ -25,7 +25,72 @@ from invenio_oaiharvester.api import get_records, list_records
 from invenio_testing import InvenioTestCase
 
 
+class OaiHarvesterModelTests(InvenioTestCase):
+
+    def setUp(self):
+        from invenio_oaiharvester.models import OaiHARVEST
+        source = OaiHARVEST(
+            name="arXiv",
+            baseurl="http://export.arxiv.org/oai2",
+            metadataprefix="arXiv",
+            setspecs="physics",
+        )
+        source.save()
+
+        self.source_id = source.id
+
+    def tearDown(self):
+        from invenio_oaiharvester.models import OaiHARVEST
+        OaiHARVEST.query.filter(OaiHARVEST.id == self.source_id).delete()
+
+    @responses.activate
+    def test_model_based_harvesting(self):
+        """Test harvesting using model."""
+        raw_xml = open(os.path.join(
+            os.path.dirname(__file__), "data/sample_arxiv_response.xml"
+        )).read()
+
+        responses.add(
+            responses.GET,
+            'http://export.arxiv.org/oai2',
+            body=raw_xml,
+            content_type='text/xml'
+        )
+
+        _, records = get_records(['oai:arXiv.org:1507.03011'],
+                                 name='arXiv')
+        assert len(records) == 1
+
+    @responses.activate
+    def test_model_based_harvesting_list(self):
+        """Test harvesting using model."""
+        from invenio_oaiharvester.utils import get_oaiharvest_object
+
+        source = get_oaiharvest_object('arXiv')
+        last_updated = source.lastrun
+
+        raw_physics_xml = open(os.path.join(
+            os.path.dirname(__file__), "data/sample_arxiv_response_listrecords_physics.xml"
+        )).read()
+
+        responses.add(
+            responses.GET,
+            re.compile(r'http?://export.arxiv.org/oai2.*set=physics&.*'),
+            body=raw_physics_xml,
+            content_type='text/xml'
+        )
+
+        _, records = list_records(name='arXiv')
+
+        assert len(records) == 150
+        assert last_updated < get_oaiharvest_object('arXiv').lastrun
+
+
 class OaiHarvesterTests(InvenioTestCase):
+
+    def test_raise_missing_info(self):
+        from invenio_oaiharvester.errors import NameOrUrlMissing
+        self.assertRaises(NameOrUrlMissing, list_records)
 
     @responses.activate
     def test_list_records(self):
