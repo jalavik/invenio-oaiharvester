@@ -21,6 +21,8 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+import datetime
+
 from invenio_ext.sqlalchemy import db
 from invenio_ext.sqlalchemy.utils import session_manager
 
@@ -82,6 +84,10 @@ class OaiHARVEST(db.Model):
     def save(self):
         """Save object to persistent storage."""
         db.session.add(self)
+
+    def update_lastrun(self, new_date=None):
+        """Update the 'lastrun' attribute of the OaiHARVEST object to now."""
+        self.lastrun = new_date or datetime.datetime.now()
 
 
 __all__ = ('OaiHARVEST',)

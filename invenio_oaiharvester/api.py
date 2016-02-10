@@ -19,6 +19,8 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+import datetime
+
 from sickle import Sickle
 
 from .errors import NameOrUrlMissing, WrongDateCombination
@@ -62,11 +64,17 @@ def list_records(metadata_prefix=None, from_date=None, until_date=None,
     if (dates['until'] is not None) and (dates['from'] > dates['until']):
         raise WrongDateCombination("'Until' date larger than 'from' date.")
 
+    lastrun_date = datetime.datetime.now()
     records = []
     for spec in setSpec.split():
         records.extend(list(request.ListRecords(metadataPrefix=metadata_prefix or "oai_dc",
                                                 set=spec,
                                                 **dates)))
+    # Update lastrun?
+    if from_date is None and until_date is None and name is not None:
+        oai_source = get_oaiharvest_object(name)
+        oai_source.update_lastrun(lastrun_date)
+        oai_source.save()
     return request, records
 
 

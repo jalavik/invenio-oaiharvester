@@ -171,15 +171,6 @@ def get_identifier_names(identifiers):
     return []
 
 
-def update_lastrun(oaiharvest_object):
-    """Update the 'lastrun' attribute of the OaiHARVEST object.
-
-    :param oaiharvest_object: An OaiHARVEST object from the database.
-    """
-    oaiharvest_object.lastrun = datetime.now()
-    oaiharvest_object.save()
-
-
 def get_oaiharvest_object(name):
     """Query and returns an OaiHARVEST object based on its name.
 

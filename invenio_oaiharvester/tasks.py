@@ -21,9 +21,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from invenio_celery import celery
 
-from ..api import get_records, list_records
-from ..signals import oaiharvest_finished
-from ..utils import get_identifier_names
+from .api import get_records, list_records
+from .signals import oaiharvest_finished
+from .utils import get_identifier_names, get_oaiharvest_object
 
 
 @celery.task
